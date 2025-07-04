@@ -29,6 +29,10 @@ Example: ./tunnel.sh -u user -p pass -h ssh.example.com -l 8080 -r 3306
 - 🛡️ **Input validation** - Validates ports, checks availability, and provides helpful error messages
 - 📝 **Comprehensive logging** - Optional verbose mode for debugging
 - 🎨 **Colored output** - Easy-to-read colored terminal output
+- ⏱️ **Modern CLI experience** - Animated spinner, status dashboard, and uptime monitoring
+- 🔍 **Network monitoring** - Built-in tools for monitoring tunnel traffic and connections
+- 🛡️ **Security warnings** - Alerts for password usage and security best practices
+- 📊 **Connection status** - Real-time tunnel status with local/remote IP information
 
 ## Quick Start
 
@@ -132,6 +136,18 @@ When you run the script, you'll see a modern interface with animated spinner and
 ## Testing & Verification Checklist
 
 Use this checklist to verify your SSH tunnel setup and test the script's features:
+
+### Quick Feature Test
+
+Run the included test script to verify basic functionality without requiring SSH connections:
+
+```bash
+# Make test script executable and run it
+chmod +x test_features.sh
+./test_features.sh
+```
+
+This will test parameter validation, error handling, and display formatting.
 
 ### Prerequisites
 - [ ] SSH client installed on your system
