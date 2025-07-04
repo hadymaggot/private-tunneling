@@ -2,6 +2,25 @@
 
 A universal Bash script for creating SSH tunnels that works seamlessly across Windows (Git Bash/WSL/PowerShell) and Linux (Ubuntu) environments.
 
+## SSH Tunnel Flow Diagram
+
+```
+┌─────────────────┐    SSH Tunnel     ┌─────────────────┐    ┌─────────────────┐
+│   Local Client  │ ◄═══════════════► │   SSH Server    │ ◄──┤  Remote Service │
+│  (Your Machine) │                   │  (Jump Host)    │    │   (Database,    │
+│                 │                   │                 │    │    Web API,     │
+│ localhost:LOCAL │                   │ REMOTE_HOST     │    │    etc.)        │
+│      PORT       │                   │                 │    │ localhost:REMOTE│
+└─────────────────┘                   └─────────────────┘    │      PORT       │
+         │                                     │              └─────────────────┘
+         │                                     │
+    Application connects                  Tunnel forwards
+    to localhost:LOCAL_PORT              to REMOTE_HOST:REMOTE_PORT
+    
+Example: ./tunnel.sh -u user -p pass -h ssh.example.com -l 8080 -r 3306
+         connects localhost:8080 ───► ssh.example.com ───► localhost:3306 (MySQL)
+```
+
 ## Features
 
 - 🌐 **Cross-platform compatibility** - Works on Windows (Git Bash, WSL, PowerShell) and Linux
@@ -66,6 +85,101 @@ chmod +x tunnel.sh
 ```bash
 ./tunnel.sh -u user -p pass -h example.com -l 8080 -r 3306 -v
 ```
+
+## Example Output
+
+When you run the script, you'll see a modern interface with animated spinner and status information:
+
+```
+⚠️  Security Warning: Using password authentication
+💡 For better security, consider using SSH keys instead of passwords
+💡 Avoid passing passwords as command-line arguments in production
+💡 Consider using environment variables: export SSHPASS='your_password' && sshpass -e ssh ...
+
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                          🚇 SSH TUNNEL SETUP                                                          ║
+╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+📡 Tunnel Configuration:
+   Local:  localhost:8080
+   Remote: db.example.com:3306
+   User:   myuser
+
+🔌 Establishing SSH connection...
+⏳ Connecting to db.example.com ▉   
+✅ SSH tunnel established successfully!
+
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                          🚇 SSH TUNNEL STATUS                                                          ║
+╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+║ Status:      ✓ Active                                                                                                 ║
+║ Local IP:    192.168.1.100                                                                                            ║
+║ Local Port:  8080                                                                                                     ║
+║ Remote:      db.example.com:3306                                                                                      ║
+║ Uptime:      00m 05s                                                                                                  ║
+║ Connect to:  localhost:8080                                                                                           ║
+╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+💡 Monitor traffic: netstat -an | grep :8080
+💡 Check connections: ss -tuln | grep :8080
+
+🎯 Tunnel is now active. Press Ctrl+C to stop.
+🔗 Connect your applications to localhost:8080
+
+⏱️  Tunnel uptime: 00m 35s               
+```
+
+## Testing & Verification Checklist
+
+Use this checklist to verify your SSH tunnel setup and test the script's features:
+
+### Prerequisites
+- [ ] SSH client installed on your system
+- [ ] `sshpass` installed (see [Installing sshpass](#installing-sshpass))
+- [ ] Network connectivity to target SSH server
+- [ ] Valid SSH credentials (username/password or SSH keys)
+
+### Basic Functionality Tests
+- [ ] **Help Command**: `./tunnel.sh --help` displays usage information
+- [ ] **Parameter Validation**: Script rejects invalid ports (e.g., `-l 99999`)
+- [ ] **Missing Parameters**: Script shows error for missing required parameters
+- [ ] **Port Availability**: Script checks if local port is already in use
+
+### Connection Tests
+- [ ] **Basic Tunnel**: Successfully establish tunnel to a known SSH server
+- [ ] **Connection Test**: Verify you can connect to `localhost:LOCAL_PORT`
+- [ ] **Verbose Mode**: Test with `-v` flag for detailed SSH output
+- [ ] **Different Ports**: Test with various local and remote port combinations
+
+### Security Features
+- [ ] **Password Warning**: Script displays security warnings for password usage
+- [ ] **SSH Key Alternative**: Test connection using SSH keys (modify script as needed)
+- [ ] **Process Isolation**: Tunnel runs as separate process that can be cleanly terminated
+
+### User Interface Features
+- [ ] **Spinner Animation**: Animated spinner appears during connection establishment
+- [ ] **Status Display**: Tunnel status box appears with connection details
+- [ ] **Uptime Counter**: Uptime updates periodically while tunnel is active
+- [ ] **Colored Output**: Messages appear in appropriate colors (green for success, red for errors)
+- [ ] **Clean Shutdown**: Ctrl+C properly terminates tunnel with summary
+
+### Cross-Platform Compatibility
+- [ ] **Linux**: Test on Ubuntu/Debian system
+- [ ] **macOS**: Test on macOS with Homebrew-installed dependencies
+- [ ] **Windows Git Bash**: Test in Git Bash environment
+- [ ] **Windows WSL**: Test in Windows Subsystem for Linux
+
+### Network Monitoring
+- [ ] **Traffic Commands**: Verify suggested monitoring commands work:
+  - `netstat -an | grep :LOCAL_PORT`
+  - `ss -tuln | grep :LOCAL_PORT`
+- [ ] **Connection Verification**: Confirm actual application connections through tunnel
+
+### Error Handling
+- [ ] **Invalid Credentials**: Script handles authentication failures gracefully
+- [ ] **Network Issues**: Script detects and reports connection failures
+- [ ] **Port Conflicts**: Script detects when local port is already in use
+- [ ] **Missing Dependencies**: Script reports missing `sshpass` with installation instructions
 
 ## Platform-Specific Instructions
 
