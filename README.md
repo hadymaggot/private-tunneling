@@ -18,6 +18,7 @@ A universal Bash script for creating SSH tunnels that works seamlessly across Wi
     to localhost:LOCAL_PORT              to REMOTE_HOST:REMOTE_PORT
     
 Example: ./tunnel.sh -u user -p pass -h ssh.example.com -l 8080 -r 3306
+         OR simply: ./tunnel.sh (when using .env file)
          connects localhost:8080 ───► ssh.example.com ───► localhost:3306 (MySQL)
 ```
 
@@ -31,7 +32,8 @@ Example: ./tunnel.sh -u user -p pass -h ssh.example.com -l 8080 -r 3306
 - 🎨 **Colored output** - Easy-to-read colored terminal output
 - ⏱️ **Modern CLI experience** - Animated spinner, status dashboard, and uptime monitoring
 - 🔍 **Network monitoring** - Built-in tools for monitoring tunnel traffic and connections
-- 🛡️ **Security warnings** - Alerts for password usage and security best practices
+- � **Real-time charts** - ASCII chart visualization for data transfer rates
+- �🛡️ **Security warnings** - Alerts for password usage and security best practices
 - 📊 **Connection status** - Real-time tunnel status with local/remote IP information
 
 ## Quick Start
@@ -44,11 +46,43 @@ cd private-tunneling
 # Make script executable
 chmod +x tunnel.sh
 
-# Create a tunnel (example: MySQL database)
+# Method 1: Using .env file (Recommended)
+cp .env.example .env
+# Edit .env with your credentials using your favorite editor
+nano .env
+# Run without parameters
+./tunnel.sh
+
+# Method 2: Using command line parameters
 ./tunnel.sh -u myuser -p mypassword -h db.example.com -l 8080 -r 3306
 ```
 
 ## Usage
+
+### Method 1: Using .env File (Recommended)
+
+Create a `.env` file from the example:
+```bash
+cp .env.example .env
+```
+
+Edit the `.env` file with your credentials:
+```bash
+# SSH Tunnel Configuration
+SSH_USERNAME=your_username
+SSH_PASSWORD=your_password
+SSH_HOST=your_host
+LOCAL_PORT=8080
+REMOTE_PORT=3306
+VERBOSE=false
+```
+
+Run the tunnel without parameters:
+```bash
+./tunnel.sh
+```
+
+### Method 2: Using Command Line Parameters
 
 ### Basic Syntax
 
@@ -66,13 +100,29 @@ chmod +x tunnel.sh
 | `-l` | Local port to bind tunnel | ✅ | `-l 8080` |
 | `-r` | Remote port to tunnel to | ✅ | `-r 3306` |
 | `-v` | Verbose mode | ❌ | `-v` |
+| `-m` | Enable real-time monitoring with chart | ❌ | `-m` |
 | `--help` | Show help message | ❌ | `--help` |
 
 ### Examples
 
+**Example using .env file:**
+```bash
+# Step 1: Copy and edit .env file
+cp .env.example .env
+nano .env  # Edit with your credentials
+
+# Step 2: Run tunnel (no parameters needed!)
+./tunnel.sh
+```
+
 **MySQL Database Tunnel:**
 ```bash
 ./tunnel.sh -u dbuser -p dbpass -h mysql.example.com -l 3306 -r 3306
+```
+
+**With Real-time Monitoring:**
+```bash
+./tunnel.sh -u user -p pass -h host.com -l 8080 -r 3306 -m
 ```
 
 **PostgreSQL Database Tunnel:**
@@ -131,6 +181,62 @@ When you run the script, you'll see a modern interface with animated spinner and
 🔗 Connect your applications to localhost:8080
 
 ⏱️  Tunnel uptime: 00m 35s               
+```
+
+## Real-time Network Monitoring
+
+The script includes advanced real-time network monitoring with ASCII chart visualization.
+
+### Monitoring Features
+
+- **Real-time transfer rates** - Shows current upload/download speeds
+- **ASCII chart visualization** - Live chart of network activity
+- **Auto-scaling charts** - Charts automatically adjust to data range
+- **Network interface detection** - Automatically finds the right network interface
+- **Human-readable formats** - Displays rates in B/s, KB/s, MB/s as appropriate
+
+### How to Enable Monitoring
+
+**Method 1: Command line parameter**
+```bash
+./tunnel.sh -u user -p pass -h host.com -l 8080 -r 3306 -m
+```
+
+**Method 2: Interactive prompt**
+```bash
+./tunnel.sh
+# When prompted: "Enable real-time network monitoring with chart? (y/N):"
+# Type 'y' and press Enter
+```
+
+**Method 3: .env configuration**
+```bash
+# Add to your .env file:
+ENABLE_MONITORING=true
+```
+
+### Monitoring Output Example
+
+```
+📊 Current Transfer Rates:
+   Download: 1.2 MB/s      Upload: 256.4 KB/s
+   Total:    1.5 MB/s
+
+┌────────────────────────────────────────────────────────┐
+│                    📊 Data Transfer Rate                │
+├────────────────────────────────────────────────────────┤
+│               █                                        │
+│          █   ██                                        │
+│      █   █   ███                                       │
+│      █ █ █ █ ███ ██                                    │
+│    █ █ █ █ ████████                                    │
+│    █ █ ███ ████████                                    │
+│  █ ███ ████████████                                    │
+│  ██████████████████                                    │
+│ ███████████████████                                    │
+│████████████████████                                    │
+└────────────────────────────────────────────────────────┘
+  Max: 1.5 MB/s   Latest: 1.2 MB/s
 ```
 
 ## Testing & Verification Checklist
