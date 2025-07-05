@@ -106,7 +106,7 @@ format_uptime() {
 show_tunnel_status() {
     if [ -n "$TUNNEL_START_TIME" ]; then
         local current_time=$(date +%s)
-        local uptime=$((current_time - TUNNEL_START_TIME))
+        local uptime=$((current_time - $TUNNEL_START_TIME))
         local local_ip=$(get_local_ip)
         
         echo
