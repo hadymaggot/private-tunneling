@@ -712,8 +712,10 @@ check_local_port "$LOCAL_PORT"
 # Create the SSH tunnel
 create_tunnel
 
-# Start monitoring network traffic in the background
-monitor_network_traffic &
+# Start monitoring network traffic in the background if enabled
+if [ "${ENABLE_MONITORING}" = "true" ]; then
+    monitor_network_traffic &
+fi
 
 # Wait for the tunnel process to exit
 wait $TUNNEL_PID
