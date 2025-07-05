@@ -26,6 +26,53 @@ VERBOSE=false
 TUNNEL_PID=""
 TUNNEL_START_TIME=""
 
+# Function to load environment variables from .env file
+load_env_file() {
+    local env_file="${1:-.env}"
+    
+    if [ -f "$env_file" ]; then
+        print_colored $BLUE "📄 Loading configuration from $env_file"
+        
+        # Read .env file and export variables
+        while IFS='=' read -r key value; do
+            # Skip empty lines and comments
+            [[ -z "$key" || "$key" =~ ^[[:space:]]*# ]] && continue
+            
+            # Remove leading/trailing whitespace and quotes
+            key=$(echo "$key" | xargs)
+            value=$(echo "$value" | xargs | sed 's/^["'\'']//' | sed 's/["'\'']$//')
+            
+            # Set variables based on .env content
+            case "$key" in
+                SSH_USERNAME|USERNAME)
+                    [ -z "$USERNAME" ] && USERNAME="$value"
+                    ;;
+                SSH_PASSWORD|PASSWORD)
+                    [ -z "$PASSWORD" ] && PASSWORD="$value"
+                    ;;
+                SSH_HOST|HOST)
+                    [ -z "$HOST" ] && HOST="$value"
+                    ;;
+                LOCAL_PORT)
+                    [ -z "$LOCAL_PORT" ] && LOCAL_PORT="$value"
+                    ;;
+                REMOTE_PORT)
+                    [ -z "$REMOTE_PORT" ] && REMOTE_PORT="$value"
+                    ;;
+                VERBOSE)
+                    [ "$VERBOSE" = false ] && [ "$value" = "true" ] && VERBOSE=true
+                    ;;
+            esac
+        done < "$env_file"
+        
+        print_colored $GREEN "✅ Configuration loaded successfully"
+        echo
+    else
+        print_colored $YELLOW "⚠️  No .env file found at $env_file"
+        echo
+    fi
+}
+
 # Function to print colored output
 print_colored() {
     local color=$1
@@ -132,9 +179,19 @@ usage() {
     cat << EOF
 Universal SSH Tunneling Script
 
-Usage: $0 -u USERNAME -p PASSWORD -h HOST -l LOCAL_PORT -r REMOTE_PORT [OPTIONS]
+Usage: $0 [OPTIONS]
+   or: $0 -u USERNAME -p PASSWORD -h HOST -l LOCAL_PORT -r REMOTE_PORT [OPTIONS]
 
-Required Parameters:
+Configuration Methods:
+  1. Using .env file (recommended):
+     - Copy .env.example to .env
+     - Edit .env with your credentials
+     - Run: $0
+
+  2. Using command line parameters:
+     - Provide all required parameters via command line
+
+Required Parameters (if not using .env):
   -u USERNAME     SSH username
   -p PASSWORD     SSH password (use SSH keys for better security)
   -h HOST         Remote SSH host (IP address or hostname)
@@ -146,8 +203,22 @@ Optional Parameters:
   --help          Show this help message
 
 Examples:
+  # Using .env file
+  cp .env.example .env
+  # Edit .env with your settings
+  $0
+
+  # Using command line parameters
   $0 -u user -p mypassword -h example.com -l 8080 -r 3306
   $0 -u admin -p secret123 -h 192.168.1.100 -l 5432 -r 5432 -v
+
+.env File Format:
+  SSH_USERNAME=your_username
+  SSH_PASSWORD=your_password
+  SSH_HOST=your_host
+  LOCAL_PORT=8080
+  REMOTE_PORT=3306
+  VERBOSE=false
 
 Security Note:
   Using SSH keys is much more secure than passwords. Consider setting up
@@ -225,6 +296,13 @@ create_tunnel() {
     print_colored $CYAN "   Local:  localhost:$LOCAL_PORT"
     print_colored $CYAN "   Remote: $HOST:$REMOTE_PORT"
     print_colored $CYAN "   User:   $USERNAME"
+    
+    # Show configuration source
+    if [ -f ".env" ]; then
+        print_colored $GREEN "   Source: .env file"
+    else
+        print_colored $YELLOW "   Source: command line parameters"
+    fi
     echo
     
     local ssh_options="-N -L $LOCAL_PORT:localhost:$REMOTE_PORT"
@@ -302,6 +380,9 @@ cleanup() {
 # Set up signal handlers
 trap cleanup SIGINT SIGTERM
 
+# Load environment variables from .env file if it exists
+load_env_file
+
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -345,6 +426,16 @@ done
 if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] || [ -z "$HOST" ] || [ -z "$LOCAL_PORT" ] || [ -z "$REMOTE_PORT" ]; then
     print_colored $RED "Error: Missing required parameters"
     echo
+    
+    # Check if .env file exists and suggest using it
+    if [ ! -f ".env" ] && [ -f ".env.example" ]; then
+        print_colored $YELLOW "💡 You can create a .env file to avoid typing parameters:"
+        print_colored $CYAN "   cp .env.example .env"
+        print_colored $CYAN "   # Edit .env with your credentials"
+        print_colored $CYAN "   ./tunnel.sh"
+        echo
+    fi
+    
     usage
     exit 1
 fi

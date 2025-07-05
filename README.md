@@ -18,6 +18,7 @@ A universal Bash script for creating SSH tunnels that works seamlessly across Wi
     to localhost:LOCAL_PORT              to REMOTE_HOST:REMOTE_PORT
     
 Example: ./tunnel.sh -u user -p pass -h ssh.example.com -l 8080 -r 3306
+         OR simply: ./tunnel.sh (when using .env file)
          connects localhost:8080 ───► ssh.example.com ───► localhost:3306 (MySQL)
 ```
 
@@ -44,11 +45,43 @@ cd private-tunneling
 # Make script executable
 chmod +x tunnel.sh
 
-# Create a tunnel (example: MySQL database)
+# Method 1: Using .env file (Recommended)
+cp .env.example .env
+# Edit .env with your credentials using your favorite editor
+nano .env
+# Run without parameters
+./tunnel.sh
+
+# Method 2: Using command line parameters
 ./tunnel.sh -u myuser -p mypassword -h db.example.com -l 8080 -r 3306
 ```
 
 ## Usage
+
+### Method 1: Using .env File (Recommended)
+
+Create a `.env` file from the example:
+```bash
+cp .env.example .env
+```
+
+Edit the `.env` file with your credentials:
+```bash
+# SSH Tunnel Configuration
+SSH_USERNAME=your_username
+SSH_PASSWORD=your_password
+SSH_HOST=your_host
+LOCAL_PORT=8080
+REMOTE_PORT=3306
+VERBOSE=false
+```
+
+Run the tunnel without parameters:
+```bash
+./tunnel.sh
+```
+
+### Method 2: Using Command Line Parameters
 
 ### Basic Syntax
 
@@ -69,6 +102,16 @@ chmod +x tunnel.sh
 | `--help` | Show help message | ❌ | `--help` |
 
 ### Examples
+
+**Example using .env file:**
+```bash
+# Step 1: Copy and edit .env file
+cp .env.example .env
+nano .env  # Edit with your credentials
+
+# Step 2: Run tunnel (no parameters needed!)
+./tunnel.sh
+```
 
 **MySQL Database Tunnel:**
 ```bash
