@@ -292,7 +292,7 @@ cleanup() {
     fi
     if [ -n "$TUNNEL_START_TIME" ]; then
         local end_time=$(date +%s)
-        local total_uptime=$((end_time - TUNNEL_START_TIME))
+        local total_uptime=$((end_time - $TUNNEL_START_TIME))
         print_colored $CYAN "⏱️  Total uptime: $(format_uptime $total_uptime)"
     fi
     print_colored $BLUE "👋 Thank you for using SSH Tunnel!"
